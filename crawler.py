@@ -4,15 +4,23 @@ import re
 import requests
 from bs4 import BeautifulSoup 
 
+
+
+
 def parser(html_doc):
     failed = []
     soup = BeautifulSoup(html_doc)
-    dealer_name = soup.find('h1' , attrs = {'class' : 'dealerName'})
-    print(dealer_name)
+    def dealer_name():
+        try:
+            dealer_name = soup.find('h1' , attrs = {'class' : 'dealerName'})
+            return dealer_name
+        except Exception as e:
+            print(e)
+            return 'bad url'
     def dealer_web():
         try:
             dealer_web = soup.find('a' , attrs = { 'target' : "_blank" })
-            print(dealer_web.text)
+            #print(dealer_web.text)
             if dealer_web:
                 return dealer_web.text
             else:
@@ -95,6 +103,8 @@ def parser(html_doc):
             print(e)
             failed.append(f'{dealer_name} dealer_time not found')
             return 'doees not exist'
+    dealer_name = dealer_name()
+    #print(dealer_name.text)
     dealer_web = dealer_web()
     dealer_phone = dealer_phone()
     dealer_time = dealer_time()
@@ -109,5 +119,4 @@ def parser(html_doc):
 
 
 
-""" out_put = (dealer_phone.text , dealer_web.text , dealer_rate['title'] ,
-    dealer_reviews.text , dealer_time.strong.text , dealer_name.text ) """
+
