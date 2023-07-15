@@ -9,9 +9,9 @@ import json
 from bs4 import BeautifulSoup 
 import pandas as pd  
 import random
-from geopy import geocoders  
+#from geopy import geocoders  
 import concurrent.futures
-from geopy.geocoders import Nominatim
+#from geopy.geocoders import Nominatim
 from concurrent import futures
 import threading
 
@@ -37,7 +37,15 @@ writer.close()
 # print((len(urls)//8))
 first_url = urls[0:63]
 second_url = urls[64:125]
-third_url = urls[126:187]
+#third_url = urls[126:187]
+
+""" urls = [
+    'https://www.cargurus.com/Cars/dl.action?entityId=&address=Ashland%2C+OR+97520&latitude=42.194576&longitude=-122.70948&distance=100&page=',
+    'https://www.cargurus.com/Cars/dl.action?entityId=&address=Charleston%2C+SC&latitude=32.776474&longitude=-79.93105&distance=100&page='
+]
+ """
+#first_url = urls[0]
+#second_url = urls[1]
 
 
 def get(link):
@@ -50,14 +58,7 @@ def get(link):
         }
         url = 'https://www.cargurus.com/'
         url += link
-        #print(url)
         response = sess.get( url  , verify=True ,headers = headers ,timeout= 40)
-        #time.sleep(random.randint(3,10))
-    #doc_text = response.text
-        #with open ('doc.txt' , 'w' , encoding="utf-8") as f:
-        #    f.write(response.text)
-        #print(response.text)
-        #print(response)
         return response.text
     except Exception:
         traceback.print_exc()
@@ -67,51 +68,63 @@ def get(link):
 
 
 
-dealer_list = []
+
 failed = []
 
 lock = Lock()
 
-def runner(urls):
+
+
+def runner(urls , thread_name):
+    #with lock:
     for url in urls:
         print(url)
-        path , name = luncher(url)
-        print(path)
-        if path != 0 :
-            links = loader(path)
-            print(len(links))
-            for link in links:
-                try:
-                    print(link)
-                    out_put = parser(get(link))
-                    lock.acquire()
-                    dealer_list.append(out_put)
-                    df = pd.DataFrame(dealer_list)
-                    writer = pd.ExcelWriter(f'primary_result/{name}.xlsx', engine='xlsxwriter')
-                    df.to_excel(writer , index=False)
-                    writer.close()
-                    lock.release()
-                    print((len(dealer_list)/len(links))*100,'%' )
-                except Exception as e:
-                    print(e)
-                    time.sleep(18)
-                    with open('failes.txt' , 'w') as f:
-                        f.write(url)
-                    
-            dealer_list = []
-        else:
-            print('unvalid url')
-print(runner(first_url))
+        path_thread , name = luncher(url , thread_name)
+        print(path_thread, name)
+        links = loader(path_thread)
+        print('ali')
+        return links , name  
+
+def crawler(links , name , thread_name):
+        thread_name = []
+        for link in links:
+            try:
+                print(link)
+                out_put = parser(get(link))
+                thread_name.append(out_put)
+                df = pd.DataFrame(thread_name)
+                writer = pd.ExcelWriter(f'primary_result/{name}.xlsx', engine='xlsxwriter')
+                df.to_excel(writer , index=False)
+                writer.close()
+                print((len(thread_name)/len(links))*100,'%' , thread_name )
+            except Exception as e:
+                print(e)
+                time.sleep(3)
+
+
+def main(thread_name , urls):
+    print(thread_name)
+    links , name = runner(urls , thread_name)
+    crawler(links, name , thread_name)
 
 
 
- 
-""" t1 = threading.Thread(target = runner, args=(first_url,))
-t2 = threading.Thread(target = runner, args = (second_url,))
+
+class showThread(threading.Thread):
+    def __init__(self , thread_name , urls):
+        super().__init__()
+        self.thread_name = thread_name
+        self.urls = urls
+    
+    def run(self):
+        main(self.thread_name, self.urls)
+
+t1 = showThread(thread_name = 'one' ,  urls = first_url)
+t2 = showThread(thread_name = 'two',  urls = second_url)
 
 
 t1.start()
 t2.start()
 
 t1.join()
-t2.join() """
+t2.join()

@@ -44,7 +44,7 @@ def page(response):
         return e
 
 
-def link_crawler(info , url):
+def link_crawler(info , url , thread_name):
     print('link_crawler')
     dealer_list = []
     failed = []
@@ -54,7 +54,7 @@ def link_crawler(info , url):
         page = page.replace(',' , '')
         #print(page)
         page = int(page)//10 + 1
-        global name 
+        #global name 
         name = info[0]
         name = name.replace(',' , '-')
         name = name.replace(' ' , '').split()[0]
@@ -103,17 +103,28 @@ def link_crawler(info , url):
                         for item in failed:
                             writer.writerow([item])
                 df = pd.DataFrame(dealer_list)
-                global path
-                path = f'primary/{name}.xlsx'
-                writer = pd.ExcelWriter( path , engine='xlsxwriter')
-                df.to_excel(writer, index=False)
-                writer.close()
+                #global path
+        if thread_name == 'one':
+            thread_name = f'primary/{name}.xlsx'
+            print(thread_name)
+            writer = pd.ExcelWriter( thread_name , engine='xlsxwriter')
+            df.to_excel(writer, index=False)
+            writer.close()
+            return thread_name , name
         else:
-            path = 0
-            name = None
+            path = f'primary/{name}.xlsx'
+            print(path)
+            writer = pd.ExcelWriter( path , engine='xlsxwriter')
+            df.to_excel(writer, index=False)
+            writer.close()
+            return path , name
+                    
 
-def luncher(urls):
+                     
+
+
+def luncher(urls , thread_name):
         response = get(urls)
         info = page(response)
-        link_crawler(info , urls)
+        path , name = link_crawler(info , urls , thread_name)
         return path , name

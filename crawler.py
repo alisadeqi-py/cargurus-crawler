@@ -9,7 +9,6 @@ lock = Lock()
 
 
 def parser(html_doc):
-    print('lets_parse')
     #with lock:
     failed = []
     soup = BeautifulSoup(html_doc)
@@ -105,9 +104,9 @@ def parser(html_doc):
         except Exception as e:
             print(e)
             failed.append(f'{dealer_name} dealer_time not found')
-            return 'doees not exist'
+            return 'does not exist'
     dealer_name = dealer_name()
-    #print(dealer_name.text)
+   #print(dealer_name.text)
     dealer_web = dealer_web()
     dealer_phone = dealer_phone()
     dealer_time = dealer_time()
