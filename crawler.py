@@ -3,11 +3,14 @@ import requests
 import re
 import requests
 from bs4 import BeautifulSoup 
+from threading import Lock
 
-
+lock = Lock()
 
 
 def parser(html_doc):
+    print('lets_parse')
+    #with lock:
     failed = []
     soup = BeautifulSoup(html_doc)
     def dealer_name():
@@ -83,7 +86,7 @@ def parser(html_doc):
         except Exception as e:
             print(e)
             failed.append(f'{dealer_name} reviews not found')
-            return 'doees not exist'
+            return 'does not exist'
     
     def dealer_time():
 
@@ -113,7 +116,7 @@ def parser(html_doc):
     dealer_count = dealer_count()
     out_put = ( dealer_name.text , dealer_phone , dealer_web , dealer_count, dealer_rate ,
         dealer_reviews , dealer_time)
-    
+
     return out_put
 
 
